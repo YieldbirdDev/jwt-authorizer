@@ -1,0 +1,22 @@
+AllCops:
+  TargetRubyVersion: 2.4
+  Exclude:
+    - "db/schema.rb"
+
+Lint/MissingCopEnableDirective:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/Encoding:
+  Enabled: false
+
+Metrics/LineLength:
+  Max: 125
+
+StringLiterals:
+  EnforcedStyle: double_quotes
+
+DotPosition:
+  EnforcedStyle: leading
