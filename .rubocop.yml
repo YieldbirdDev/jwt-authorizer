@@ -15,6 +15,10 @@ Style/Encoding:
 Metrics/LineLength:
   Max: 125
 
+Metrics/BlockLength:
+  Exclude:
+    - "spec/**/*.rb"
+
 StringLiterals:
   EnforcedStyle: double_quotes
 
