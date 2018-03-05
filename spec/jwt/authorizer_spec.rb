@@ -16,6 +16,21 @@ RSpec.describe JWT::Authorizer do
     it { is_expected.to eq described_class.configuration }
   end
 
+  describe ".inherited" do
+    before { described_class.configuration.secret = "hmac" }
+    after  { described_class.configuration.remove_instance_variable("@secret") }
+
+    let(:subclass) { Class.new(described_class) }
+
+    it "copies configuration" do
+      expect(subclass.configuration.secret).to eq(private: "hmac", public: "hmac")
+    end
+
+    it "doesn't assign same configuration object" do
+      expect(subclass.configuration).to_not eq(described_class.configuration)
+    end
+  end
+
   describe ".new" do
     context "once an authorizer is instantiated" do
       before { described_class.new }
