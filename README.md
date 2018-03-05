@@ -2,9 +2,7 @@
 
 # JWT::Authorizer
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/jwt/authorizer`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+`JWT::Authorizer` makes authorization with [JWT tokens](https://jwt.io/) simple. It allows creating and verifying JWT tokens according to rules (validations) set on specific `Authorizer` class.
 
 ## Installation
 
@@ -24,7 +22,97 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+### Configuration
+
+You can configure your `JWT::Authorizer` classes with `.configuration` and `.configure` options:
+
+```ruby
+JWT::Authorizer.configuration
+
+JWT::Authorizer.configure do |config|
+  config.expiry = 12 * 60 * 60
+  config.algorithm = "RS256"
+  config.secret = { private_key: nil, public_key: ENV["SECRET_KEY"] }
+end
+```
+
+`JWT::Authorizer` have following options available:
+
+* `algorithm` - determines algorithm used on signing and verifying JWT tokens. Defaults to `"HS256"`.
+* `secret` - for [`HMAC`](https://en.wikipedia.org/wiki/HMAC) algorithms it accepts simple `String` with symmetric key, for [`RSA`](https://en.wikipedia.org/wiki/RSA_(cryptosystem)) and [`ECDSA`](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) it requires hash with `:private_key` and `:public_key` keys.
+* `expiry` - sets default expiry for generated tokens. Defaults to 1 hour. It can be set to `nil` in order to not include `exp` claim in the token
+* `issuer` - sets `iss` claim in the token. Defaults to `nil`.
+* `allowed_issuers` - array of issuers that will be allowed on token verification. Defaults to empty array, tokens with any value in `iss` claim (and without this claim) will be valid. If array contains any elements, *only* listed issuers will be valid.
+
+Default options can be overriden during instantiation of `JWT::Authorizer` classes:
+
+```ruby
+JWT::Authorizer.configuration.expiry #=> 3600
+JWT::Authorizer.new(expiry: 60).expiry #=> 60
+```
+
+### Generating tokens
+
+To generate JWT token, create instance of `JWT::Authorizer` and call `#build` method. It accepts hash of additional claims you want in your token.
+
+```ruby
+JWT::Authorizer.configuration.secret = "hmac"
+JWT::Authorizer.new.build(level: :admin)
+#=> "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MjAyODQ3MTcsImxldmVsIjoiYWRtaW4ifQ.nHRIBBjzteHuzygij-BlfXx3YIvfeO39Qh84hq729KQ"
+```
+
+### Verifying tokens
+
+To verify token, use `JWT::Authorizer#verify` method.
+
+```ruby
+JWT::Authorizer.configuration.secret = "hmac"
+token = "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MjAyODUwMzd9.CO8K_mqXCZfu8W12tpYcBo1WyrLZAmEMmr8R-HM3a5E"
+JWT::Authorizer.new.verify(token)
+#=> [{"exp"=>1520285037}, {"alg"=>"HS256"}]
+JWT::Authorizer.new.verify(nil)
+# JWT::DecodeError: Nil JSON web token
+JWT::Authorizer.new.verify("eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjB9.nooope")
+# JWT::VerificationError: Signature verification raised
+```
+
+### Validators
+
+You can use validators to verify non-standard claims.
+
+```ruby
+class AdminAuthorizer < JWT::Authorizer
+  validate :level, required: true do |value, _context|
+    raise JWT::DecodeError, "Level must be admin" unless value == "admin"
+  end
+end
+
+valid_token = "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MjAyODUzMzksImxldmVsIjoiYWRtaW4ifQ.OeIPSbtqlmcSJ1tUkLb7HhhMSlcAXKkrZhSOhgvYRHE"
+AdminAuthorizer.new.verify(valid_token)
+# [{"exp"=>1520285339, "level"=>"admin"}, {"alg"=>"HS256"}]
+missing_claim = "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MjAyODUzODd9.ncXmy81O64OjLNP4eCdAyVklAfGqdYiWp0K6FoI1pec"
+AdminAuthorizer.new.verify(missing_claim)
+# JWT::Authorizer::MissingClaim: Token is missing required claim: level
+invalid_value = "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MjAyODU0MzQsImxldmVsIjoicmVndWxhciJ9.z16nhJcOpRJmDZdkrDrdo1TetQ9YZpYiQmBdc53lnV0"
+AdminAuthorizer.new.verify(invalid_value)
+# JWT::DecodeError: Level must be admin
+```
+
+`required` option is by default set to `false`. If set to `true`, given claim *must* be present in verified token.
+
+You can pass additional context to validators:
+
+```ruby
+class AdminAuthorizer < JWT::Authorizer
+  validate :path do |value, rack_request|
+    raise JWT::DecodeError, "invalid path" unless value == rack_request.path
+  end
+end
+
+AdminAuthorizer.new.verify(token, rack_request)
+```
+
+See [`JWT::RequestAuthorizer`](lib/jwt/request_authorizer.rb) and it's [spec](spec/jwt/request_authorizer_spec.rb) for examples.
 
 ## Development
 
