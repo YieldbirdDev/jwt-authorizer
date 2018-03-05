@@ -19,3 +19,5 @@ module JWT
     include Validation
   end
 end
+
+require "jwt/request_authorizer"

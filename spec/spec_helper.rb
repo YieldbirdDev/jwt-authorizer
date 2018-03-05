@@ -9,6 +9,7 @@ require "bundler/setup"
 require "jwt/authorizer"
 
 require "pry"
+require "rack"
 require "timecop"
 
 require "support/timecop_helper"
