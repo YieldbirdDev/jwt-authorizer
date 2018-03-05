@@ -4,32 +4,11 @@ require "jwt/authorizer/version"
 require "jwt"
 
 require "jwt/authorizer/configuration"
+require "jwt/authorizer/configurable"
 
 module JWT
   class Authorizer
-    extend Forwardable
-
-    class << self
-      def configuration
-        @configuration ||= Configuration.new
-      end
-
-      def configure
-        yield configuration
-        configuration
-      end
-
-      def new(*args)
-        configuration.freeze unless configuration.frozen?
-        super
-      end
-    end
-
-    delegate %i[algorithm secret expiry issuer allowed_issuers] => :@config
-
-    def initialize(**options)
-      @config = self.class.configuration.dup.merge(options)
-    end
+    include Configurable
 
     def build(claims = {})
       payload = default_claims.merge!(claims)
