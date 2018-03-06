@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module JWT
-  class Authorizer
+  class Token
     module Builder
       def build(claims = {})
         payload = default_claims.merge!(claims)

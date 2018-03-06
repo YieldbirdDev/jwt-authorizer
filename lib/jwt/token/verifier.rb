@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module JWT
-  class Authorizer
+  class Token
     module Verifier
       def verify(token)
         JWT.decode token, secret[:public], true, decode_options

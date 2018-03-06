@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module JWT
-  class Authorizer
+  class Token
     class MissingClaim < StandardError
       attr_reader :claim
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe JWT::Authorizer::Configuration do
+RSpec.describe JWT::Token::Configuration do
   let(:config) { described_class.new }
 
   let(:default_params) { { algorithm: "HS256", secret: nil, expiry: 3_600, issuer: nil, allowed_issuers: [] } }

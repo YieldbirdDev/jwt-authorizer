@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe JWT::Authorizer::ClaimValidator do
+RSpec.describe JWT::Token::ClaimValidator do
   let(:validator) do
     described_class.new(name: :req, required: required) do |value, rack_env|
       raise "Unexpected request" if value != [rack_env["REQUEST_METHOD"], rack_env["PATH_INFO"]]
@@ -25,7 +25,7 @@ RSpec.describe JWT::Authorizer::ClaimValidator do
 
       context "and it is required" do
         let(:required) { true }
-        it { expect { subject }.to raise_error(JWT::Authorizer::MissingClaim, "Token is missing required claim: req") }
+        it { expect { subject }.to raise_error(JWT::Token::MissingClaim, "Token is missing required claim: req") }
       end
     end
 

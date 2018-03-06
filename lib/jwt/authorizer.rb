@@ -3,21 +3,19 @@
 require "jwt/authorizer/version"
 require "jwt"
 
-require "jwt/authorizer/builder"
-require "jwt/authorizer/configuration"
-require "jwt/authorizer/configurable"
-require "jwt/authorizer/verifier"
+require "jwt/token/builder"
+require "jwt/token/configuration"
+require "jwt/token/configurable"
+require "jwt/token/verifier"
 
-require "jwt/authorizer/claim_validator"
-require "jwt/authorizer/validation"
+require "jwt/token/claim_validator"
+require "jwt/token/validation"
+
+require "jwt/token"
 
 module JWT
-  class Authorizer
-    include Configurable
-    include Builder
-    include Verifier
-    include Validation
+  module Authorizer
   end
 end
 
-require "jwt/request_authorizer"
+require "jwt/endpoint_token"

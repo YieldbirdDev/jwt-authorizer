@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module JWT
-  class Authorizer
+  class Token
     module Configurable
       def self.included(base)
         base.extend(ClassMethods)

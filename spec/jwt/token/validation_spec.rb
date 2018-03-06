@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-RSpec.describe JWT::Authorizer::Validation do
-  let(:authorizer) do
-    Class.new(JWT::Authorizer) do
+RSpec.describe JWT::Token::Validation do
+  let(:token_class) do
+    Class.new(JWT::Token) do
       validate :req do |value, env|
         raise "Invalid request" unless value == env["REQUEST_METHOD"]
       end
@@ -10,30 +10,30 @@ RSpec.describe JWT::Authorizer::Validation do
   end
 
   describe ".validators" do
-    subject { authorizer.validators }
+    subject { token_class.validators }
 
     it { expect(subject.size).to eq 1 }
-    it { expect(subject).to all(be_a_kind_of(JWT::Authorizer::ClaimValidator)) }
+    it { expect(subject).to all(be_a_kind_of(JWT::Token::ClaimValidator)) }
   end
 
   describe ".validate" do
     let(:verifier) { proc {} }
-    subject { authorizer.validate(:clm, required: true, &verifier) }
+    subject { token_class.validate(:clm, required: true, &verifier) }
 
     it "adds new validator" do
-      expect { subject }.to change { authorizer.validators.size }.to(2)
+      expect { subject }.to change { token_class.validators.size }.to(2)
     end
 
     describe "added validator" do
       before { subject }
-      let(:validator) { authorizer.validators.last }
+      let(:validator) { token_class.validators.last }
 
       it { expect(validator).to have_attributes(name: "clm", required: true, verifier: verifier) }
     end
   end
 
   describe "#verify" do
-    let(:instance) { authorizer.new(secret: "hmac") }
+    let(:instance) { token_class.new(secret: "hmac") }
     let(:token) { "eyJhbGciOiJIUzI1NiJ9.eyJyZXEiOiJQT1NUIn0.r8kvqu8DUSI30WEl8NmWwqMxu3889ESIZTLc4x8lXEU" }
 
     subject { instance.verify(token, context) }

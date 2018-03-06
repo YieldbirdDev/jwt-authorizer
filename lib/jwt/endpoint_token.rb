@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module JWT
-  class RequestAuthorizer < Authorizer
+  class EndpointToken < Token
     class << self
       attr_writer :token_extractor
 

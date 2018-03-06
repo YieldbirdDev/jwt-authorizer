@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module JWT
-  class Authorizer
+  class Token
     class Configuration
       ATTRIBUTES = %i[algorithm secret expiry issuer allowed_issuers].freeze
 

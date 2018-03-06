@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe JWT::RequestAuthorizer do
+RSpec.describe JWT::EndpointToken do
   let(:request) { Rack::Request.new(Rack::MockRequest.env_for(uri.to_s, method: method)) }
   let(:uri)     { URI::HTTPS.build(host: "supertest.pl", path: path, query: URI.encode_www_form(query)) }
   let(:method)  { :get }
@@ -8,13 +8,13 @@ RSpec.describe JWT::RequestAuthorizer do
   let(:path)  { "/some/path" }
   let(:query) { { block_ads: :yes } }
 
-  let(:authorizer)   { described_class.new(secret: "hmac", issuer: "service") }
-  let(:valid_token)  { authorizer.build(path: path, verb: method) }
-  let(:invalid_path) { authorizer.build(path: "/others", verb: method) }
-  let(:invalid_verb) { authorizer.build(path: path, verb: "POST") }
+  let(:token)        { described_class.new(secret: "hmac", issuer: "service") }
+  let(:valid_token)  { token.build(path: path, verb: method) }
+  let(:invalid_path) { token.build(path: "/others", verb: method) }
+  let(:invalid_verb) { token.build(path: path, verb: "POST") }
 
   describe "#verify" do
-    subject { authorizer.verify(request) }
+    subject { token.verify(request) }
 
     context "when no JWT token given" do
       it { expect { subject }.to raise_error(JWT::DecodeError, "Nil JSON web token") }
