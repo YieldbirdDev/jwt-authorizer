@@ -3,6 +3,8 @@
 RSpec.describe JWT::Token::Validation do
   let(:token_class) do
     Class.new(JWT::Token) do
+      configuration.secret = "hmac"
+
       validate :req do |value, env|
         raise "Invalid request" unless value == env["REQUEST_METHOD"]
       end
@@ -33,7 +35,7 @@ RSpec.describe JWT::Token::Validation do
   end
 
   describe "#verify" do
-    let(:instance) { token_class.new(secret: "hmac") }
+    let(:instance) { token_class.new }
     let(:token) { "eyJhbGciOiJIUzI1NiJ9.eyJyZXEiOiJQT1NUIn0.r8kvqu8DUSI30WEl8NmWwqMxu3889ESIZTLc4x8lXEU" }
 
     subject { instance.verify(token, context) }

@@ -6,11 +6,7 @@ module JWT
       def self.included(base)
         base.extend(ClassMethods)
         base.extend(Forwardable)
-        base.delegate %i[algorithm secret expiry issuer allowed_issuers] => :@config
-      end
-
-      def initialize(**options)
-        @config = self.class.configuration.dup.merge(options)
+        base.delegate %i[algorithm secret expiry issuer allowed_issuers] => "self.class.configuration"
       end
 
       module ClassMethods

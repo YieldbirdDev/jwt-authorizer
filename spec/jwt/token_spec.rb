@@ -37,8 +37,14 @@ RSpec.describe JWT::Token do
     end
   end
 
+  let(:token_class) do
+    Class.new(described_class).tap do |token_class|
+      token_class.configuration.merge(options)
+    end
+  end
+
   let(:options) { { secret: "hmac", allowed_issuers: %w[super_service client] } }
-  let(:token)   { described_class.new(options) }
+  let(:token) { token_class.new }
 
   describe "#initialize" do
     subject { token }

@@ -8,7 +8,13 @@ RSpec.describe JWT::EndpointToken do
   let(:path)  { "/some/path" }
   let(:query) { { block_ads: :yes } }
 
-  let(:token)        { described_class.new(secret: "hmac", issuer: "service") }
+  let(:token_class) do
+    Class.new(described_class) do
+      configuration.merge(secret: "hmac", issuer: "service")
+    end
+  end
+
+  let(:token)        { token_class.new }
   let(:valid_token)  { token.build(path: path, verb: method) }
   let(:invalid_path) { token.build(path: "/others", verb: method) }
   let(:invalid_verb) { token.build(path: path, verb: "POST") }
