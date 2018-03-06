@@ -10,6 +10,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Michał Begejowicz"]
   spec.email         = ["michal.begejowicz@codesthq.com"]
 
+  spec.required_ruby_version = "~> 2.4"
+
   spec.summary       = "Authorization of requests for microservices based on JWT"
   spec.description   = "Authorization of requests for microservices based on JWT"
   spec.homepage      = "https://github.com/codesthq/jwt-authorizer"
