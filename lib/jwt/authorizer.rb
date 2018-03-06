@@ -11,6 +11,8 @@ require "jwt/token/verifier"
 require "jwt/token/claim_validator"
 require "jwt/token/validation"
 
+require "jwt/token/default_claims"
+
 require "jwt/token"
 
 module JWT

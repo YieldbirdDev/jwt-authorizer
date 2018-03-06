@@ -12,6 +12,7 @@ require "pry"
 require "rack"
 require "timecop"
 
+require "support/shared_examples/default_claims"
 require "support/timecop_helper"
 
 RSpec.configure do |config|

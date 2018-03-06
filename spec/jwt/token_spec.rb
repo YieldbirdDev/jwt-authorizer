@@ -44,14 +44,14 @@ RSpec.describe JWT::Token do
   let(:options) { { secret: "hmac", allowed_issuers: %w[super_service client] } }
   let(:token) { token_class.new }
 
-  describe "#initialize" do
+  describe "#initialize", freeze_at: Time.utc(2018, 3, 6, 11) do
     subject { token }
 
     let(:expected_attributes) do
       {
         algorithm: "HS256",
         secret: { private: "hmac", public: "hmac" },
-        expiry: 3_600,
+        expiry: Time.utc(2018, 3, 6, 12).to_i,
         allowed_issuers: %w[super_service client]
       }
     end
@@ -137,4 +137,6 @@ RSpec.describe JWT::Token do
       end
     end
   end
+
+  include_examples "default claims"
 end

@@ -6,5 +6,7 @@ module JWT
     include Builder
     include Verifier
     include Validation
+
+    include DefaultClaims
   end
 end
