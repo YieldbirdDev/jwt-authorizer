@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/codesthq/jwt-authorizer.svg?branch=master)](https://travis-ci.org/codesthq/jwt-authorizer) [![Test Coverage](https://api.codeclimate.com/v1/badges/5f975bb8720b7ee04326/test_coverage)](https://codeclimate.com/github/codesthq/jwt-authorizer/test_coverage) [![Maintainability](https://api.codeclimate.com/v1/badges/5f975bb8720b7ee04326/maintainability)](https://codeclimate.com/github/codesthq/jwt-authorizer/maintainability)
+[![Gem Version](https://badge.fury.io/rb/jwt-authorizer.svg)](https://badge.fury.io/rb/jwt-authorizer) [![Build Status](https://travis-ci.org/codesthq/jwt-authorizer.svg?branch=master)](https://travis-ci.org/codesthq/jwt-authorizer) [![Test Coverage](https://api.codeclimate.com/v1/badges/5f975bb8720b7ee04326/test_coverage)](https://codeclimate.com/github/codesthq/jwt-authorizer/test_coverage) [![Maintainability](https://api.codeclimate.com/v1/badges/5f975bb8720b7ee04326/maintainability)](https://codeclimate.com/github/codesthq/jwt-authorizer/maintainability)
 
 # JWT::Authorizer
 
