@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    jwt-authorizer (1.0.0.beta1)
+    jwt-authorizer (1.0.0.beta2)
       jwt (~> 2.1)
 
 GEM
