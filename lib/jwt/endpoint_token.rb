@@ -8,20 +8,20 @@ module JWT
       def token_extractor
         @token_extractor ||= proc { |req| req.env["X-Auth-Token"] || req.params["_t"] }
       end
+
+      def verify(rack_request)
+        token = token_extractor.call(rack_request)
+
+        super(token, rack_request)
+      end
     end
 
-    validate :path, required: true do |value, rack_req|
+    claim :path, required: true do |value, rack_req|
       raise JWT::DecodeError, "Unexpected path: #{value}" unless value == rack_req.path
     end
 
-    validate :verb, required: true do |value, rack_req|
+    claim :verb, required: true do |value, rack_req|
       raise JWT::DecodeError, "Unexpected request method: #{value}" unless value.to_s.upcase == rack_req.request_method
-    end
-
-    def verify(rack_request)
-      token = self.class.token_extractor.call(rack_request)
-
-      super(token, rack_request)
     end
   end
 end

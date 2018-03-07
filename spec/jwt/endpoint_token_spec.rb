@@ -14,13 +14,12 @@ RSpec.describe JWT::EndpointToken do
     end
   end
 
-  let(:token)        { token_class.new }
-  let(:valid_token)  { token.build(path: path, verb: method) }
-  let(:invalid_path) { token.build(path: "/others", verb: method) }
-  let(:invalid_verb) { token.build(path: path, verb: "POST") }
+  let(:valid_token)  { token_class.new(path: path, verb: method).to_jwt }
+  let(:invalid_path) { token_class.new(path: "/others", verb: method).to_jwt }
+  let(:invalid_verb) { token_class.new(path: path, verb: "POST").to_jwt }
 
-  describe "#verify" do
-    subject { token.verify(request) }
+  describe ".verify" do
+    subject { token_class.verify(request) }
 
     context "when no JWT token given" do
       it { expect { subject }.to raise_error(JWT::DecodeError, "Nil JSON web token") }

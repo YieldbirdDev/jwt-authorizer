@@ -3,10 +3,13 @@
 module JWT
   class Token
     module Builder
-      def build(additional_claims = {})
-        payload = claims.merge(additional_claims).compact
-        JWT.encode payload, secret[:private], algorithm
+      def initialize(claims = {})
+        claims.each { |claim, value| send("#{claim}=", value) }
       end
+
+      def to_jwt
+        JWT.encode claims.compact, secret[:private], algorithm
+      end; alias to_s to_jwt
     end
   end
 end

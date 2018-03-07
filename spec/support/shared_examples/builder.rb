@@ -4,9 +4,16 @@ RSpec.shared_examples "builder" do
   context "builder" do
     include_context "token class"
 
-    describe "#build", freeze_at: Time.utc(2018, 3, 4, 14) do
-      subject { instance.build(additional_options) }
-      let(:additional_options) { {} }
+    before do
+      token_class.claim(:uri, required: false) {}
+      token_class.claim(:method, key: "verb", required: false) {}
+    end
+
+    let(:instance) { token_class.new(additional_options) }
+    let(:additional_options) { {} }
+
+    describe "#to_jwt", freeze_at: Time.utc(2018, 3, 4, 14) do
+      subject { instance.to_jwt }
 
       it { is_expected.to eq token_with_expiry }
 

@@ -3,10 +3,11 @@
 module JWT
   class Token
     include Configurable
-    include Builder
-    include Verifier
-    include Validation
 
     include DefaultClaims
+    include ClaimBuilder
+
+    include Builder
+    include Verifier
   end
 end

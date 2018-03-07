@@ -4,15 +4,15 @@ RSpec.shared_examples "verifier" do
   context "verifier" do
     include_context "token class"
 
-    describe "#verify" do
+    describe ".verify" do
       let(:options) { { secret: "hmac" } }
-      subject { instance.verify(jwt_token) }
+      subject { token_class.verify(jwt_token) }
 
       context "expiry claim" do
         let(:jwt_token) { token_with_expiry }
 
         context "when token not expired", freeze_at: Time.utc(2018, 3, 4, 14, 30) do
-          it { is_expected.to eq [{ "exp" => 1_520_175_600 }, { "alg" => "HS256" }] }
+          it { is_expected.to have_attributes(expiry: 1_520_175_600) }
         end
 
         context "when token expired", freeze_at: Time.utc(2018, 3, 4, 15, 30) do
@@ -39,7 +39,7 @@ RSpec.shared_examples "verifier" do
           let(:options) { super().merge(allowed_issuers: ["service"]) }
           let(:jwt_token) { token_with_issuer_and_expiry }
 
-          it { is_expected.to eq [{ "exp" => 1_520_175_600, "iss" => "service" }, { "alg" => "HS256" }] }
+          it { is_expected.to have_attributes(expiry: 1_520_175_600, issuer: "service") }
         end
       end
     end

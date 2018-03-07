@@ -14,6 +14,7 @@ require "timecop"
 
 require "support/shared_contexts/token_class"
 require "support/shared_examples/builder"
+require "support/shared_examples/claim_builder"
 require "support/shared_examples/configurable"
 require "support/shared_examples/default_claims"
 require "support/shared_examples/verifier"
