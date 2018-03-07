@@ -44,75 +44,129 @@ end
 * `issuer` - sets `iss` claim in the token. Defaults to `nil`.
 * `allowed_issuers` - array of issuers that will be allowed on token verification. Defaults to empty array, tokens with any value in `iss` claim (and without this claim) will be valid. If array contains any elements, *only* listed issuers will be valid.
 
-Default options can be overriden during instantiation of `JWT::Token` classes:
+Default claims can be overriden during instantiation of `JWT::Token` classes:
 
 ```ruby
-JWT::Token.configuration.expiry #=> 3600
-JWT::Token.new(expiry: 60).expiry #=> 60
+JWT::Token.configuration.expiry #=> 3600 (offset)
+JWT::Token.new(expiry: Time.utc(2018, 3, 1)).expiry #=> 1519862400 (timestamp)
 ```
 
 ### Generating tokens
 
-To generate JWT token, create instance of `JWT::Token` and call `#build` method. It accepts hash of additional claims you want in your token.
+To generate JWT token, create instance of `JWT::Token`. It accepts hash of additional claims you want in your token.
 
 ```ruby
-JWT::Token.configuration.secret = "hmac"
-JWT::Token.new.build(level: :admin)
-#=> "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MjAyODQ3MTcsImxldmVsIjoiYWRtaW4ifQ.nHRIBBjzteHuzygij-BlfXx3YIvfeO39Qh84hq729KQ"
+class MyToken < JWT::Token
+  claim :level, required: true
+end
+token = MyToken.new(level: :admin)
+token.to_s # or token.to_jwt
+#=> "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MjA0MTI2MTcsImxldmVsIjoiYWRtaW4ifQ.Ak8qDlxSG9IcPVHYnelQHPK5U6Rj5hBYQ5mmoznuYso"
 ```
 
 ### Verifying tokens
 
-To verify token, use `JWT::Token#verify` method.
+To verify token, use `JWT::Token.verify` method.
 
 ```ruby
-JWT::Token.configuration.secret = "hmac"
-token = "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MjAyODUwMzd9.CO8K_mqXCZfu8W12tpYcBo1WyrLZAmEMmr8R-HM3a5E"
-JWT::Token.new.verify(token)
-#=> [{"exp"=>1520285037}, {"alg"=>"HS256"}]
-JWT::Token.new.verify(nil)
+token = "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MjA0MTI2Nzd9.EgiqWfDjXzlJHTwaFn26X3iOl2gBkQv3fADtMsFIQDY"
+JWT::Token.verify(token)
+#=> #<JWT::Token @claims={"exp"=>1520412677, "iss"=>nil}>
+JWT::Token.verify(nil)
 # JWT::DecodeError: Nil JSON web token
-JWT::Token.new.verify("eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjB9.nooope")
+JWT::Token.verify("eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjB9.nooope")
 # JWT::VerificationError: Signature verification raised
 ```
 
-### Validators
+### Claims
 
-You can use validators to verify non-standard claims.
+You can use claims to define and verify non-standard claims.
 
 ```ruby
-class AdminAuthorizer < JWT::Token
-  validate :level, required: true do |value, _context|
+class AdminToken < JWT::Token
+  claim :level, key: "lvl", required: true do |value|
     raise JWT::DecodeError, "Level must be admin" unless value == "admin"
   end
 end
 
-valid_token = "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MjAyODUzMzksImxldmVsIjoiYWRtaW4ifQ.OeIPSbtqlmcSJ1tUkLb7HhhMSlcAXKkrZhSOhgvYRHE"
-AdminAuthorizer.new.verify(valid_token)
-# [{"exp"=>1520285339, "level"=>"admin"}, {"alg"=>"HS256"}]
-missing_claim = "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MjAyODUzODd9.ncXmy81O64OjLNP4eCdAyVklAfGqdYiWp0K6FoI1pec"
-AdminAuthorizer.new.verify(missing_claim)
-# JWT::Token::MissingClaim: Token is missing required claim: level
-invalid_value = "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MjAyODU0MzQsImxldmVsIjoicmVndWxhciJ9.z16nhJcOpRJmDZdkrDrdo1TetQ9YZpYiQmBdc53lnV0"
-AdminAuthorizer.new.verify(invalid_value)
+valid_token = "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MjA0MTI3ODksImxldmVsIjoiYWRtaW4ifQ.GGD0dXWg7v8BiEg8fsjmdCXQBryAHRpx_8AihyNVmgs"
+AdminToken.verify(valid_token)
+#=> #<AdminToken @claims={"exp"=>1520412789, "iss"=>nil, "lvl"=>"admin"}>
+missing_claim = "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MjA0MTI3ODl9.efq_LuSpfp5VRwFl3rIf0FC_b2CCrpEC_oeDssvLDy4"
+AdminToken.verify(missing_claim)
+# JWT::Token::MissingClaim: Token is missing required claim: lvl
+invalid_value = "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MjA0NTI3ODksImx2bCI6InJlZ3VsYXIifQ.EjXX9zhE4SpzFSlGIPD5l0xKtMKgWSbWa5smw3OvBEo"
+AdminToken.verify(invalid_value)
 # JWT::DecodeError: Level must be admin
 ```
 
 `required` option is by default set to `false`. If set to `true`, given claim *must* be present in verified token.
+`key` options is by default the same as claim name. It corresponds to JSON inside JWT.
 
-You can pass additional context to validators:
+You can pass additional context to claims:
 
 ```ruby
-class AdminAuthorizer < JWT::Token
-  validate :path do |value, rack_request|
+class AdminToken < JWT::Token
+  claim :path do |value, rack_request|
     raise JWT::DecodeError, "invalid path" unless value == rack_request.path
   end
 end
 
-AdminAuthorizer.new.verify(token, rack_request)
+AdminToken.verify(token, rack_request)
 ```
 
 See [`JWT::EndpointToken`](lib/jwt/endpoint_token.rb) and it's [spec](spec/jwt/endpoint_token_spec.rb) for examples.
+
+### Default claims
+
+Gem currently supports two of the standard claims: `exp` and `iss`.
+
+#### Expiry
+
+You can set `expiry` option on configuration to a preferred offset for generated tokens:
+
+```ruby
+class LongLivedToken < JWT::Token
+  configuration.expiry = 2 * 365 * 24 * 60 * 60
+end
+
+token = LongLivedToken.new
+Time.at token.expiry
+#=> 2020-03-06 08:59:52 +0100
+```
+
+Note that `expiry` option in configuration is an offset, while on token instance it's a timestamp.
+
+On instance you can either assign timestamp, or a `Time` instance.
+
+```ruby
+token = JWT::Token.new
+token.expiry = Time.utc(2021, 1, 1)
+token.expiry
+#=> 1609459200
+
+JWT::Token.new(expiry: Time.utc(2021, 1, 1)).expiry
+#=> 1609459200
+```
+
+`exp` claim will be validated if present.
+
+### Issuer
+
+In order to validate `issuer` claim, set `allowed_issuers` on token class:
+
+```ruby
+class MicroserviceToken < JWT::Token
+  configuration.allowed_issuers = ["apiservice", "cronservice"]
+end
+
+MicroserviceToken.verify(MicroserviceToken.new(issuer: "apiservice").to_jwt)
+#=> #<MicroserviceToken @claims={"exp"=>1520413510, "iss"=>"apiservice"}>
+MicroserviceToken.verify(MicroserviceToken.new(issuer: "otherservice").to_jwt)
+# JWT::InvalidIssuerError: Invalid issuer. Expected ["apiservice", "cronservice"], received otherservice
+MicroserviceToken.verify(MicroserviceToken.new(issuer: nil).to_jwt)
+# JWT::InvalidIssuerError: Invalid issuer. Expected ["apiservice", "cronservice"], received <none>
+```
 
 ## Development
 
@@ -122,7 +176,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/jwt-authorizer. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome on GitHub at https://github.com/codesthq/jwt-authorizer. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
 ## License
 
@@ -130,4 +184,4 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 ## Code of Conduct
 
-Everyone interacting in the JWT::Token project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/jwt-authorizer/blob/master/CODE_OF_CONDUCT.md).
+Everyone interacting in the JWT::Token project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/codesthq/jwt-authorizer/blob/master/CODE_OF_CONDUCT.md).
