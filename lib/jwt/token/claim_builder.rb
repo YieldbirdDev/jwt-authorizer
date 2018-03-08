@@ -3,23 +3,26 @@
 module JWT
   class Token
     module ClaimBuilder
+      class ClaimAccessor < Module
+        def initialize(claim)
+          super() do
+            define_getters(claim)
+            define_setters(claim)
+          end
+        end
+
+        def define_getters(claim)
+          define_method(claim.name) { claims[claim.key] }
+          define_method(claim.key)  { send(claim.name) } if claim.key != claim.name.to_s
+        end
+
+        def define_setters(claim)
+          define_method("#{claim.name}=") { |value| claims[claim.key] = value }
+          define_method("#{claim.key}=")  { |value| send("#{claim.name}=", value) } if claim.key != claim.name.to_s
+        end
+      end
+
       class << self
-        def define_accessor_methods(token_class, claim)
-          define_getter(token_class, claim)
-          define_setter(token_class, claim)
-        end
-
-        def define_getter(token_class, claim)
-          token_class.send(:define_method, claim.name) { claims[claim.key] }
-          token_class.send(:alias_method, claim.key, claim.name)
-        end
-
-        def define_setter(token_class, claim)
-          method_name = "#{claim.name}="
-          token_class.send(:define_method, method_name) { |value| claims[claim.key] = value }
-          token_class.send(:alias_method, "#{claim.key}=", method_name)
-        end
-
         def included(base)
           base.extend(ClassMethods)
           super
@@ -40,7 +43,7 @@ module JWT
           claim = JWT::Token::Claim.new(name, key, required, verifier).tap(&:freeze)
 
           claims << claim
-          JWT::Token::ClaimBuilder.define_accessor_methods(self, claim)
+          include(ClaimAccessor.new(claim))
         end
       end
     end

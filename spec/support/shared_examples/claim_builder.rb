@@ -24,19 +24,38 @@ RSpec.shared_examples "claim builder" do
         it { is_expected.to have_attributes(name: :constraints, key: "csr", required: false, verifier: verifier) }
       end
 
-      describe "writer method" do
-        subject { instance.constraints = ["invalid"] }
+      describe "writer methods" do
+        shared_examples "method assigning claim" do
+          it { expect { subject }.to change { instance.claims["csr"] }.to(["invalid"]) }
+        end
 
-        it { expect { subject }.to change { instance.claims["csr"] }.to(["invalid"]) }
-        it { expect(instance.method(:constraints=)).to eq instance.method(:csr=) }
+        context "claim name writer" do
+          subject { instance.constraints = ["invalid"] }
+
+          it_behaves_like "method assigning claim"
+        end
+
+        context "key writer" do
+          subject { instance.csr = ["invalid"] }
+
+          it_behaves_like "method assigning claim"
+        end
       end
 
-      describe "reader method" do
+      describe "reader methods" do
         before  { instance.claims["csr"] = ["valid"] }
-        subject { instance.constraints }
 
-        it { is_expected.to eq ["valid"] }
-        it { expect(instance.method(:constraints)).to eq instance.method(:csr) }
+        context "claim name reader" do
+          subject { instance.constraints }
+
+          it { is_expected.to eq ["valid"] }
+        end
+
+        context "key reader" do
+          subject { instance.csr }
+
+          it { is_expected.to eq ["valid"] }
+        end
       end
     end
   end

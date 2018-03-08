@@ -6,4 +6,6 @@ RSpec.describe JWT::Token do
   include_examples "configurable"
   include_examples "default claims"
   include_examples "verifier"
+
+  include_examples "custom claims"
 end
