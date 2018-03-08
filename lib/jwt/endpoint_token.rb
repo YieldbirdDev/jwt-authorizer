@@ -6,7 +6,7 @@ module JWT
       attr_writer :token_extractor
 
       def token_extractor
-        @token_extractor ||= proc { |req| req.env["X-Auth-Token"] || req.params["_t"] }
+        @token_extractor ||= proc { |req| req.env["HTTP_X_AUTH_TOKEN"] || req.params["_t"] }
       end
 
       def verify(rack_request)

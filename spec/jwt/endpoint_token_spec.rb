@@ -27,21 +27,25 @@ RSpec.describe JWT::EndpointToken do
 
     context "when valid token passed as param" do
       let(:query) { super().merge(_t: valid_token) }
+
       it { expect { subject }.to_not raise_error }
     end
 
     context "when valid token passed as header" do
-      before { request.add_header("X-Auth-Token", valid_token) }
+      before { request.add_header("HTTP_X_AUTH_TOKEN", valid_token) }
+
       it { expect { subject }.to_not raise_error }
     end
 
     context "when token with different path passed" do
-      before { request.add_header("X-Auth-Token", invalid_path) }
+      before { request.add_header("HTTP_X_AUTH_TOKEN", invalid_path) }
+
       it { expect { subject }.to raise_error(JWT::DecodeError, "Unexpected path: /others") }
     end
 
     context "when token with different method passed" do
-      before { request.add_header("X-Auth-Token", invalid_verb) }
+      before { request.add_header("HTTP_X_AUTH_TOKEN", invalid_verb) }
+
       it { expect { subject }.to raise_error(JWT::DecodeError, "Unexpected request method: POST") }
     end
   end
