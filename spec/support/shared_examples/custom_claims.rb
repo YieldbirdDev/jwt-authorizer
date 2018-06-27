@@ -6,7 +6,7 @@ RSpec.shared_examples "custom claims" do
       let(:token_class) do
         Class.new(JWT::Token) do
           configure do |config|
-            config.secret = "hmac"
+            config.hmac.key = "hmac"
           end
 
           claim :user, key: "usr"

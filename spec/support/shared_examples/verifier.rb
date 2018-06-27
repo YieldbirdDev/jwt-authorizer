@@ -5,7 +5,7 @@ RSpec.shared_examples "verifier" do
     include_context "token class"
 
     describe ".verify" do
-      let(:options) { { secret: "hmac" } }
+      let(:options) { { hmac: { key: "hmac" } } }
       subject { token_class.verify(jwt_token) }
 
       context "expiry claim" do

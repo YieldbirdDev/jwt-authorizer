@@ -3,7 +3,10 @@
 require "jwt/authorizer/version"
 require "jwt"
 
+require "jwt/token/asymmetric_key_configuration"
 require "jwt/token/builder"
+require "jwt/token/hmac_configuration"
+require "jwt/token/configuration"
 require "jwt/token/configuration"
 require "jwt/token/configurable"
 require "jwt/token/verifier"

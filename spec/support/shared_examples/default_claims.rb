@@ -8,7 +8,7 @@ RSpec.shared_examples "default claims" do
       end
     end
 
-    let(:options)  { { secret: "hmac" } }
+    let(:options)  { { hmac: { key: "hmac" } } }
     let(:instance) { token_class.new }
 
     context "attributes" do

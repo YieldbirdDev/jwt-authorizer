@@ -10,7 +10,7 @@ RSpec.describe JWT::EndpointToken do
 
   let(:token_class) do
     Class.new(described_class) do
-      configuration.merge(secret: "hmac", issuer: "service")
+      configuration.merge(hmac: { key: "hmac" }, issuer: "service")
     end
   end
 

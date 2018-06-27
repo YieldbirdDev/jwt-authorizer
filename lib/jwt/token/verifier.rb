@@ -10,7 +10,10 @@ module JWT
 
       module ClassMethods
         def verify(jwt_token, context = nil)
-          decoded = JWT.decode(jwt_token, configuration.secret[:public], true, decode_options)
+          decoded = JWT.decode(jwt_token, nil, true, decode_options) do |header|
+            algorithm_type = JWT::Token::Configuration::ALGORITHMS[header["alg"]]
+            configuration.send(algorithm_type).public_key if algorithm_type
+          end
 
           new(decoded[0]).tap do |token|
             claims.each do |claim|
@@ -22,12 +25,8 @@ module JWT
         private
 
         def decode_options
-          {}.tap do |result|
-            if configuration.allowed_issuers.any?
-              result[:iss] = configuration.allowed_issuers
-              result[:verify_iss] = true
-            end
-            result[:algorithm] = configuration.algorithm
+          { algorithms: configuration.allowed_algorithms }.tap do |result|
+            result.merge!(iss: configuration.allowed_issuers, verify_iss: true) if configuration.allowed_issuers.any?
           end
         end
       end

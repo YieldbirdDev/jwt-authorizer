@@ -21,7 +21,7 @@ RSpec.shared_examples "configurable" do
       let(:subclass) { Class.new(token_class) }
 
       it "copies configuration" do
-        expect(subclass.configuration.secret).to eq(private: "hmac", public: "hmac")
+        expect(subclass.configuration.hmac).to have_attributes(private_key: "hmac", public_key: "hmac")
       end
 
       it "doesn't assign same configuration object" do
@@ -45,7 +45,7 @@ RSpec.shared_examples "configurable" do
       let(:expected_attributes) do
         {
           algorithm: "HS256",
-          secret: { private: "hmac", public: "hmac" },
+          private_key: "hmac",
           expiry: Time.utc(2018, 3, 6, 12).to_i,
           allowed_issuers: %w[super_service client]
         }

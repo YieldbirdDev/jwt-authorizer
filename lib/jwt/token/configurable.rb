@@ -6,7 +6,7 @@ module JWT
       def self.included(base)
         base.extend(ClassMethods)
         base.extend(Forwardable)
-        base.delegate %i[algorithm secret allowed_issuers] => "self.class.configuration"
+        base.delegate %i[algorithm private_key allowed_issuers] => "self.class.configuration"
       end
 
       module ClassMethods

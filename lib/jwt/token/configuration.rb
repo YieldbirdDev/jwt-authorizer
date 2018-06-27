@@ -3,7 +3,7 @@
 module JWT
   class Token
     class Configuration
-      ATTRIBUTES = %i[algorithm secret expiry issuer allowed_issuers].freeze
+      ATTRIBUTES = %i[algorithm hmac rsa ecdsa expiry issuer allowed_issuers allowed_algorithms].freeze
 
       ALGORITHMS = {
         "HS256" => :hmac, "HS512256" => :hmac, "HS384" => :hmac, "HS512" => :hmac,
@@ -15,27 +15,26 @@ module JWT
         @algorithm = "HS256"
         @expiry = 60 * 60
         @allowed_issuers = []
+        @allowed_algorithms = ["HS256"]
+        @hmac = HMACConfiguration.new
+        @rsa = AsymmetricKeyConfiguration.new(OpenSSL::PKey::RSA)
+        @ecdsa = AsymmetricKeyConfiguration.new(OpenSSL::PKey::EC)
       end
 
-      attr_accessor :expiry, :allowed_issuers, :issuer
-      attr_reader :secret, :algorithm
+      attr_accessor :expiry, :allowed_issuers, :allowed_algorithms, :issuer
+      attr_reader :algorithm, :hmac, :rsa, :ecdsa
 
       def algorithm=(value)
         assert_algorithm_valid(value)
         @algorithm = value.to_s
       end
 
-      def secret=(hmac_key = nil, private_key: nil, public_key: nil)
-        @secret = case algorithm_type
-                  when :hmac
-                    { private: hmac_key, public: hmac_key }
-                  else
-                    { private: private_key, public: public_key }
-                  end
-      end
-
       def algorithm_type
         ALGORITHMS[algorithm]
+      end
+
+      def private_key
+        send(algorithm_type).private_key
       end
 
       def to_h
@@ -47,7 +46,11 @@ module JWT
         raise ArgumentError, "Unpermitted options: #{unpermitted_options.join(', ')}" if unpermitted_options.any?
 
         options.each do |key, value|
-          send("#{key}=", value)
+          if value.is_a?(Hash)
+            send(key).tap { |option| value.each { |suboption, subvalue| option.send("#{suboption}=", subvalue) } }
+          else
+            send("#{key}=", value)
+          end
         end
 
         self
@@ -55,15 +58,15 @@ module JWT
 
       def dup
         super.tap do |new_config|
-          new_config.instance_variable_set("@allowed_issuers", allowed_issuers.dup)
-          new_config.instance_variable_set("@secret", secret.dup)
+          %i[allowed_issuers allowed_algorithms hmac rsa ecdsa].each do |option|
+            new_config.instance_variable_set("@#{option}", send(option).dup)
+          end
         end
       end
 
       def freeze
         super
-        allowed_issuers.freeze
-        secret.freeze
+        [allowed_issuers, allowed_algorithms, hmac, rsa, ecdsa].each(&:freeze)
       end
 
       private

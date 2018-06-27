@@ -8,7 +8,7 @@ module JWT
       end
 
       def to_jwt
-        JWT.encode claims.compact, secret[:private], algorithm
+        JWT.encode claims.compact, private_key, algorithm
       end; alias to_s to_jwt
     end
   end

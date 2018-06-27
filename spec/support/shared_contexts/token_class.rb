@@ -6,7 +6,7 @@ RSpec.shared_context "token class" do
     Class.new(described_class).tap { |token_class| token_class.configuration.merge(options) }
   end
 
-  let(:options)  { { secret: "hmac", allowed_issuers: %w[super_service client] } }
+  let(:options)  { { hmac: { key: "hmac" }, allowed_issuers: %w[super_service client] } }
   let(:instance) { token_class.new }
 
   let(:token_with_expiry) do
