@@ -32,14 +32,18 @@ JWT::Token.configuration
 JWT::Token.configure do |config|
   config.expiry = 12 * 60 * 60
   config.algorithm = "RS256"
-  config.secret = { private_key: nil, public_key: ENV["SECRET_KEY"] }
+  config.rsa.authorized_keys = [OpenSSL::PKey::RSA.new(ENV["SECRET_KEY"])]
 end
 ```
 
 `JWT::Token` have following options available:
 
 * `algorithm` - determines algorithm used on signing and verifying JWT tokens. Defaults to `"HS256"`.
-* `secret` - for [`HMAC`](https://en.wikipedia.org/wiki/HMAC) algorithms it accepts simple `String` with symmetric key, for [`RSA`](https://en.wikipedia.org/wiki/RSA_(cryptosystem)) and [`ECDSA`](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) it requires hash with `:private_key` and `:public_key` keys.
+* `hmac` - [`HMAC`](https://en.wikipedia.org/wiki/HMAC) configuration:
+   - `hmac.key` - symmetric key used by HMAC algorithm
+* `rsa` | `ecdsa` - [`RSA`](https://en.wikipedia.org/wiki/RSA_(cryptosystem)) and [`ECDSA`](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) configuration:
+   - `rsa.authorized_keys` | `ecdsa.authorized_keys` - `Array` of `OpenSSL::PKey::PKey` objects with allowed public keys
+   - `rsa.authorized_keys_file` | `ecdsa.authorized_keys_file` - path to file containing authorized public keys in PEM format
 * `expiry` - sets default expiry for generated tokens. Defaults to 1 hour. It can be set to `nil` in order to not include `exp` claim in the token
 * `issuer` - sets `iss` claim in the token. Defaults to `nil`.
 * `allowed_issuers` - array of issuers that will be allowed on token verification. Defaults to empty array, tokens with any value in `iss` claim (and without this claim) will be valid. If array contains any elements, *only* listed issuers will be valid.
