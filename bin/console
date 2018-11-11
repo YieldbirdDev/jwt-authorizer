@@ -8,7 +8,7 @@ require "jwt/authorizer"
 # with your gem easier. You can also use a different console, if you like.
 
 JWT::Token.configure do |config|
-  config.secret = "hmac"
+  config.hmac.key = "hmac"
 end
 
 require "pry"
