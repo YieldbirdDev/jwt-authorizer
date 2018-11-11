@@ -24,7 +24,8 @@ module JWT
       def verify(token, context = nil)
         value = token.send(name)
 
-        raise(MissingClaim, key)      if required && value.nil?
+        raise(MissingClaim, key) if required && value.nil?
+
         verifier.call(value, context) if value
       end
     end

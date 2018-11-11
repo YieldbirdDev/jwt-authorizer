@@ -73,6 +73,7 @@ module JWT
 
       def assert_algorithm_valid(algorithm)
         return if ALGORITHMS.key?(algorithm.to_s)
+
         raise ArgumentError, "Unknown algorithm: #{algorithm}. Should be one of: #{ALGORITHMS.keys.join(', ')}"
       end
     end
