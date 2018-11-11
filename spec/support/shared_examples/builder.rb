@@ -34,6 +34,15 @@ RSpec.shared_examples "builder" do
 
         it { is_expected.to eq token_with_additional_options }
       end
+
+      context "when key is not supplied" do
+        let(:options) { super().merge(hmac: {}) }
+
+        it "raises error" do
+          expect { subject }
+            .to raise_error(JWT::Token::MissingPrivateKey, "Private key required for signing tokens is missing!")
+        end
+      end
     end
   end
 end
