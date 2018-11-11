@@ -5,8 +5,8 @@ RSpec.shared_examples "builder" do
     include_context "token class"
 
     before do
-      token_class.claim(:uri, required: false) {}
-      token_class.claim(:method, key: "verb", required: false) {}
+      token_class.claim(:uri, required: false)
+      token_class.claim(:method, key: "verb", required: false)
     end
 
     let(:instance) { token_class.new(additional_options) }

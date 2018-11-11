@@ -26,7 +26,7 @@ module JWT
 
         raise(MissingClaim, key) if required && value.nil?
 
-        verifier.call(value, context) if value
+        verifier.call(value, context) if value && verifier
       end
     end
   end

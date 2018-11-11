@@ -38,6 +38,12 @@ RSpec.describe JWT::Token::Claim do
 
         it { expect { subject }.to raise_error(JWT::DecodeError, "Incorrect status") }
       end
+
+      context "and verifier was not supplied" do
+        let(:verifier) { nil }
+
+        it { expect { subject }.to_not raise_error }
+      end
     end
   end
 end
