@@ -23,5 +23,11 @@ module JWT
     claim :verb, required: true do |value, rack_req|
       raise JWT::DecodeError, "Unexpected request method: #{value}" unless value.to_s.upcase == rack_req.request_method
     end
+
+    claim :query, required: false do |value, rack_req|
+      unless  Rack::Utils.parse_nested_query(value) == rack_req.params.delete_if { |k, _v| k == "_t" }
+        raise JWT::DecodeError, "Unexpected query parameters: #{value}"
+      end
+    end
   end
 end

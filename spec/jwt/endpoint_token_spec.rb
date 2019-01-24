@@ -14,9 +14,11 @@ RSpec.describe JWT::EndpointToken do
     end
   end
 
-  let(:valid_token)  { token_class.new(path: path, verb: method).to_jwt }
+  let(:valid_token) { token_class.new(path: path, verb: method).to_jwt }
+  let(:valid_token_with_query) { token_class.new(path: path, verb: method, query: "block_ads=yes").to_jwt }
   let(:invalid_path) { token_class.new(path: "/others", verb: method).to_jwt }
   let(:invalid_verb) { token_class.new(path: path, verb: "POST").to_jwt }
+  let(:invalid_query) { token_class.new(path: path, verb: method, query: "a=b").to_jwt }
 
   describe ".verify" do
     subject { token_class.verify(request) }
@@ -26,15 +28,30 @@ RSpec.describe JWT::EndpointToken do
     end
 
     context "when valid token passed as param" do
-      let(:query) { super().merge(_t: valid_token) }
+      let(:token) { valid_token }
+      let(:query) { super().merge(_t: token) }
 
       it { expect { subject }.to_not raise_error }
+
+      context "when query present in token" do
+        let(:token) { valid_token_with_query }
+
+        it { expect { subject }.to_not raise_error }
+      end
     end
 
     context "when valid token passed as header" do
-      before { request.add_header("HTTP_X_AUTH_TOKEN", valid_token) }
+      let(:token) { valid_token }
+
+      before { request.add_header("HTTP_X_AUTH_TOKEN", token) }
 
       it { expect { subject }.to_not raise_error }
+
+      context "when query present in token" do
+        let(:token) { valid_token_with_query }
+
+        it { expect { subject }.to_not raise_error }
+      end
     end
 
     context "when token with different path passed" do
@@ -47,6 +64,12 @@ RSpec.describe JWT::EndpointToken do
       before { request.add_header("HTTP_X_AUTH_TOKEN", invalid_verb) }
 
       it { expect { subject }.to raise_error(JWT::DecodeError, "Unexpected request method: POST") }
+    end
+
+    context "when token with different query passed" do
+      before { request.add_header("HTTP_X_AUTH_TOKEN", invalid_query) }
+
+      it { expect { subject }.to raise_error(JWT::DecodeError, "Unexpected query parameters: a=b") }
     end
   end
 end
