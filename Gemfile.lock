@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    jwt-authorizer (2.0.1)
+    jwt-authorizer (2.1.0)
       jwt (~> 2.1)
 
 GEM
@@ -70,4 +70,4 @@ DEPENDENCIES
   timecop (~> 0.9)
 
 BUNDLED WITH
-   1.17.1
+   1.17.3
